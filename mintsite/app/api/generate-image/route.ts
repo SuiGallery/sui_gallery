@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server';
+import { fakePost } from '../../../mock';
+
+const USE_FAKE_API = process.env.NEXT_PUBLIC_USE_FAKE_API === 'true';
 
 export async function POST(request: Request) {
   const { prompt } = await request.json();
 
+  if (USE_FAKE_API) {
+    const fakeData = await fakePost(prompt);
+    return NextResponse.json(fakeData);
+  }
+
   const url = 'https://apikeyplus.com/v1/images/generations';
-  const api_key = process.env.DALLE_API_KEY; // 将API密钥存储在环境变量中
+  const api_key = process.env.DALLE_API_KEY;
 
   const headers = {
     'Authorization': `Bearer ${api_key}`,
@@ -15,8 +23,8 @@ export async function POST(request: Request) {
     "model": "dall-e-3",
     'prompt': prompt,
     'n': 1,
-    'quality': "standard",
-    'size': '1024x1024'
+    'quality': "hd",
+    'size': '1792x1024'
   };
 
   try {
@@ -32,22 +40,4 @@ export async function POST(request: Request) {
     console.error('Error:', error);
     return NextResponse.json({ error: 'Failed to generate image' }, { status: 500 });
   }
-}
-
-const sampleImages = [
-  '/sample1.jpg',
-  '/sample2.jpg',
-  '/sample3.jpg',
-];
-
-export async function fakePost(prompt: string): Promise<{ data: { url: string }[] }> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  console.log(prompt);
-  // Randomly select an image
-  const randomImage = sampleImages[Math.floor(Math.random() * sampleImages.length)];
-
-  return {
-    data: [{ url: randomImage }]
-  };
 }

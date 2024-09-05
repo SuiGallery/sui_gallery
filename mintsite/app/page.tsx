@@ -6,7 +6,6 @@ import { Button } from "../components/Button";
 import { ImageDisplay } from "../components/ImageDisplay";
 import { isValidSuiAddress } from "@mysten/sui.js/utils";
 import Image from "next/image";
-import { fakePost } from "./api/generate-image/route";
 
 export default function Home() {
   const currentAccount = useCurrentAccount();
@@ -23,16 +22,14 @@ export default function Home() {
     setIsLoading(true);
     setImageUrl(''); // Clear the previous image
     try {
-      // const response = await fetch('/api/generate-image', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ prompt: description }),
-      // });
-      // const data = await response.json();
-
-      const data = await fakePost(description);
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: description }),
+      });
+      const data = await response.json();
       if (data.data && data.data[0] && data.data[0].url) {
         setImageUrl(data.data[0].url);
       } else {
