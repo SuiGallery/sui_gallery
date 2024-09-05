@@ -1,13 +1,15 @@
 'use client'
-import { ConnectModal, useCurrentAccount } from "@mysten/dapp-kit";
+import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
 import { TextArea } from "@radix-ui/themes";
 import { useState } from "react";
 import { Button } from "../components/Button";
 import { ImageDisplay } from "../components/ImageDisplay";
+import { isValidSuiAddress } from "@mysten/sui.js/utils";
+import Image from "next/image";
+import { fakePost } from "./api/generate-image/route";
 
 export default function Home() {
   const currentAccount = useCurrentAccount();
-  const [open, setOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -21,14 +23,16 @@ export default function Home() {
     setIsLoading(true);
     setImageUrl(''); // Clear the previous image
     try {
-      const response = await fetch('/api/generate-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt: description }),
-      });
-      const data = await response.json();
+      // const response = await fetch('/api/generate-image', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ prompt: description }),
+      // });
+      // const data = await response.json();
+
+      const data = await fakePost(description);
       if (data.data && data.data[0] && data.data[0].url) {
         setImageUrl(data.data[0].url);
       } else {
@@ -48,13 +52,9 @@ export default function Home() {
       {/* Nav */}
       <nav className="flex justify-between items-center w-full">
         <div className="text-2xl font-bold">
-          <p className="uppercase font-bold text-6xl text-white">Sui Galery</p>
+          <Image src="/title.png" alt="Logo" width={300} height={100} />
         </div>
-        <ConnectModal trigger={
-          <div className="bg-gradient-to-b from-blue-500 to-fuchsia-500 rounded-3xl p-5 hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95" >
-            <p className="uppercase font-bold text-white">Connect Wallet</p>
-          </div>
-        } open={open} onOpenChange={(isOpen) => setOpen(isOpen)} />
+        <ConnectButton className="bg-gradient-to-b w-44 h-14 from-blue-500 to-fuchsia-500 hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"/>
       </nav>
 
       <ImageDisplay imageUrl={imageUrl} isLoading={isLoading} />
@@ -79,7 +79,7 @@ export default function Home() {
           </Button>
           <Button
             onClick={() => alert("Minting functionality not implemented yet")}
-            disabled={isLoading || !imageUrl}
+            disabled={isLoading || !imageUrl || currentAccount?.address === undefined || !isValidSuiAddress(currentAccount?.address)}
             isLoading={false}
             className="w-full bg-gradient-to-b from-fuchsia-200 to-fuchsia-500"
           >

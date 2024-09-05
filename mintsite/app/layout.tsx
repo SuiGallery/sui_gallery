@@ -9,6 +9,7 @@ import { Theme } from "@radix-ui/themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@mysten/dapp-kit/dist/index.css";
 import '@radix-ui/themes/styles.css';
+import { lightTheme } from "../theme/custom_wallet";
 
 
 
@@ -29,7 +30,7 @@ export default function RootLayout({
         <Theme appearance="light" accentColor="orange" radius="full">
           <QueryClientProvider client={queryClient}>
             <SuiClientProvider networks={networkConfig} defaultNetwork="rpc">
-              <WalletProvider autoConnect>{children}</WalletProvider>
+              <WalletProvider autoConnect theme={lightTheme}>{children}</WalletProvider>
             </SuiClientProvider>
           </QueryClientProvider>
         </Theme>

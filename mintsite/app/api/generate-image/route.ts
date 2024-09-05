@@ -15,8 +15,8 @@ export async function POST(request: Request) {
     "model": "dall-e-3",
     'prompt': prompt,
     'n': 1,
-    'quality': "hd",
-    'size': '1792x1024'
+    'quality': "standard",
+    'size': '1024x1024'
   };
 
   try {
@@ -32,4 +32,22 @@ export async function POST(request: Request) {
     console.error('Error:', error);
     return NextResponse.json({ error: 'Failed to generate image' }, { status: 500 });
   }
+}
+
+const sampleImages = [
+  '/sample1.jpg',
+  '/sample2.jpg',
+  '/sample3.jpg',
+];
+
+export async function fakePost(prompt: string): Promise<{ data: { url: string }[] }> {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
+  // Randomly select an image
+  const randomImage = sampleImages[Math.floor(Math.random() * sampleImages.length)];
+
+  return {
+    data: [{ url: randomImage }]
+  };
 }
