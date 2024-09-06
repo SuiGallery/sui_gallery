@@ -1,3 +1,4 @@
+'use server'
 import { NextResponse } from 'next/server';
 import { fakePost } from '../../../mock';
 

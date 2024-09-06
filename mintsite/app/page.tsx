@@ -49,7 +49,7 @@ export default function Home() {
       {/* Nav */}
       <nav className="flex justify-between items-center w-full">
         <div className="text-2xl font-bold">
-          <Image src="/title.png" alt="Logo" width={300} height={100} />
+          <Image src="/title.png" alt="Logo" width={343} height={188} priority/>
         </div>
         <ConnectButton className="bg-gradient-to-b w-44 h-14 from-blue-500 to-fuchsia-500 hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"/>
       </nav>

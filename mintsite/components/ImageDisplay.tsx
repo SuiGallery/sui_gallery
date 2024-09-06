@@ -13,7 +13,7 @@ export function ImageDisplay({ imageUrl, isLoading }: ImageDisplayProps) {
           Generating image...
         </div>
       ) : imageUrl ? (
-        <Image src={imageUrl} fill sizes="100vw" alt="Generated" className="w-full h-full object-contain" />
+        <Image src={imageUrl} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" alt="Generated" className="w-full h-full object-contain"/>
       ) : (
         <div className="absolute inset-0 flex items-center justify-center text-gray-500">
           Your image will appear here
