@@ -1,7 +1,6 @@
 'use client'
 import "./globals.css";
 import {
-  createNetworkConfig,
   SuiClientProvider,
   WalletProvider,
 } from "@mysten/dapp-kit";
@@ -11,9 +10,6 @@ import "@mysten/dapp-kit/dist/index.css";
 import '@radix-ui/themes/styles.css';
 import { lightTheme } from "../theme/custom_wallet";
 import { networkConfig } from "../config";
-
-
-
 
 
 const queryClient = new QueryClient();

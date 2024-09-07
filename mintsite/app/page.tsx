@@ -57,11 +57,10 @@ export default function Home() {
     try {
       const blobInfo = await storeBlob(imageUrl);
       console.log("Uploaded blob info:", blobInfo);
-      if (blobInfo) {
-        const tx = await mint(blobInfo.blobId, currentAccount?.address!);
+      if (blobInfo && currentAccount?.address) {
+        const tx = await mint(blobInfo.blobId, currentAccount?.address);
         await signAndExecuteTransaction({
           transaction: tx,
-          chain: "sui:testnet",
         },{
           onSuccess: (result) => {
             console.log("Transaction successful:", result);
