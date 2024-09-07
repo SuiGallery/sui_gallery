@@ -6,12 +6,14 @@ import { Button } from "../components/Button";
 import { ImageDisplay } from "../components/ImageDisplay";
 import { isValidSuiAddress } from "@mysten/sui.js/utils";
 import Image from "next/image";
+import { useImageUploader, UploadedBlobInfo } from "@/hooks/useImageUploader";
 
 export default function Home() {
   const currentAccount = useCurrentAccount();
   const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const {epochs, setEpochs, uploading, uploadedBlobs, storeBlob} = useImageUploader();
 
   const generateImage = async () => {
     if (!description.trim()) {
@@ -41,6 +43,24 @@ export default function Home() {
       alert('An error occurred while generating the image. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleMint = async () => {
+    if (!imageUrl) {
+      alert("Please generate an image first.");
+      return;
+    }
+
+    try {
+      const blobInfo = await storeBlob(imageUrl);
+      console.log("Uploaded blob info:", blobInfo);
+      alert(`Image uploaded successfully. Blob ID: ${blobInfo.blobId}`);
+      // Here you would typically call your minting function with the blobInfo
+      // For example: await mintNFT(blobInfo.blobId, description);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('An error occurred while uploading the image. Please try again.');
     }
   };
 
@@ -75,9 +95,9 @@ export default function Home() {
             <p className="uppercase font-bold text-white self-center">Create</p>
           </Button>
           <Button
-            onClick={() => alert("Minting functionality not implemented yet")}
-            disabled={isLoading || !imageUrl || currentAccount?.address === undefined || !isValidSuiAddress(currentAccount?.address)}
-            isLoading={false}
+            onClick={handleMint}
+            disabled={isLoading || !imageUrl || uploading || currentAccount?.address === undefined || !isValidSuiAddress(currentAccount?.address)}
+            isLoading={uploading}
             className="w-full bg-gradient-to-b from-fuchsia-200 to-fuchsia-500"
           >
             <p className="uppercase font-bold text-white self-center">Mint</p>
