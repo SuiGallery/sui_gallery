@@ -41,7 +41,7 @@ export default function Home() {
         alert('Failed to generate image. Please try again.');
       }
     } catch (error) {
-      console.error('Error generating image:', error);
+      console.error('Error generating image:', error instanceof Error ? error.message : 'Unknown error');
       alert('An error occurred while generating the image. Please try again.');
     } finally {
       setIsLoading(false);

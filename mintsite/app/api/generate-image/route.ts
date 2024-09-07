@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { fakePost } from '../../../mock';
 
 const USE_FAKE_API = process.env.NEXT_PUBLIC_USE_FAKE_API === 'true';
+const TIMEOUT_DURATION = 120000; // 增加到 120 秒
+const MAX_RETRIES = 3;
 
 export async function POST(request: Request) {
   const { prompt } = await request.json();
@@ -24,21 +26,41 @@ export async function POST(request: Request) {
     "model": "dall-e-3",
     'prompt': prompt,
     'n': 1,
-    'quality': "hd",
-    'size': '1792x1024'
+    'quality': "standard",
+    'size': '1024x1024'
   };
 
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify(payload),
-    });
+  let retries = 0;
+  while (retries < MAX_RETRIES) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_DURATION);
 
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Error:', error);
-    return NextResponse.json({ error: 'Failed to generate image' }, { status: 500 });
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return NextResponse.json(data);
+    } catch (error) {
+      console.error('Error:', error);
+      retries++;
+      if (retries >= MAX_RETRIES || (error instanceof Error && error.name !== 'AbortError')) {
+        return NextResponse.json({ error: 'Failed to generate image' }, { status: 500 });
+      }
+      // 如果是超时错误，等待一段时间后重试
+      //await new Promise(resolve => setTimeout(resolve, 5000));
+    }
   }
+
+  return NextResponse.json({ error: 'Max retries reached' }, { status: 504 });
 }
