@@ -1,19 +1,21 @@
 'use client'
-import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
+import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { TextArea } from "@radix-ui/themes";
 import { useState } from "react";
 import { Button } from "../components/Button";
 import { ImageDisplay } from "../components/ImageDisplay";
 import { isValidSuiAddress } from "@mysten/sui.js/utils";
 import Image from "next/image";
-import { useImageUploader, UploadedBlobInfo } from "@/hooks/useImageUploader";
+import { useImageUploader } from "@/hooks/useImageUploader";
+import { mint } from "@/contract";
 
 export default function Home() {
   const currentAccount = useCurrentAccount();
   const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const {epochs, setEpochs, uploading, uploadedBlobs, storeBlob} = useImageUploader();
+  const {uploading,  storeBlob} = useImageUploader();
+  const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   const generateImage = async () => {
     if (!description.trim()) {
@@ -55,9 +57,20 @@ export default function Home() {
     try {
       const blobInfo = await storeBlob(imageUrl);
       console.log("Uploaded blob info:", blobInfo);
-      alert(`Image uploaded successfully. Blob ID: ${blobInfo.blobId}`);
-      // Here you would typically call your minting function with the blobInfo
-      // For example: await mintNFT(blobInfo.blobId, description);
+      if (blobInfo) {
+        const tx = await mint(blobInfo.blobId, currentAccount?.address!);
+        await signAndExecuteTransaction({
+          transaction: tx,
+          chain: "sui:testnet",
+        },{
+          onSuccess: (result) => {
+            console.log("Transaction successful:", result);
+          },
+          onError: (error) => {
+            console.error("Transaction failed:", error);
+          }
+        })
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('An error occurred while uploading the image. Please try again.');

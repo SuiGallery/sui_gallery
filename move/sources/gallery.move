@@ -9,7 +9,7 @@ use sui::table::{Self, Table};
 
 const BASE36: vector<u8> = b"0123456789abcdefghijklmnopqrstuvwxyz";
 const VISUALIZATION_SITE: address =
-    @0x5d4de9a4cad93bf61dff4e850d9f748d85b92e66dc56b0723081ac60011fa6d2;
+    @0xe85a97a3e07f984c53e1a8a1dc6bd32ebec4e48610b3191e4e2e911eccabcb9b;
 
 public struct State has key {
     id: UID,
@@ -41,7 +41,7 @@ fun init(otw: GALLERY, ctx: &mut TxContext) {
     );
     display.add(
         b"image_url".to_string(),
-        b"{image_blob}".to_string(),
+        b"https://clgallery.cyberchenjw.workers.dev/?objectId={id}".to_string(),
     );
     display.add(
         b"walrus site address".to_string(),
@@ -57,17 +57,17 @@ fun init(otw: GALLERY, ctx: &mut TxContext) {
 /// Creates a new Art.
 ///
 /// The color and number of sides are chosen at random.
-entry fun mint(blob_id: String, state: &mut State, ctx: &mut TxContext) {
+public fun mint(blob_id: String, state: &mut State, ctx: &mut TxContext):Art {
     let sender = tx_context::sender(ctx);
     let art = new(blob_id, ctx);
-    transfer::transfer(art, sender);
-
+    
     if(!table::contains(&state.artists, sender)){
         table::add(&mut state.artists, sender, Collection{artist: sender, minted: vector::empty()});
     };
     let collection = table::borrow_mut(&mut state.artists, sender);
     vector::push_back(&mut collection.minted, blob_id);
     state.total_art = state.total_art + 1;
+    art
 }
 
 fun new(blob_id: String, ctx: &mut TxContext): Art {

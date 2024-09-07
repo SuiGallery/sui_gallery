@@ -10,12 +10,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@mysten/dapp-kit/dist/index.css";
 import '@radix-ui/themes/styles.css';
 import { lightTheme } from "../theme/custom_wallet";
+import { networkConfig } from "../config";
 
 
 
-const { networkConfig } = createNetworkConfig({
-  rpc: { url: process.env.NEXT_PUBLIC_SUI_NETWORK! },
-});
+
 
 const queryClient = new QueryClient();
 
@@ -29,7 +28,7 @@ export default function RootLayout({
       <body>
         <Theme appearance="light" accentColor="orange" radius="full">
           <QueryClientProvider client={queryClient}>
-            <SuiClientProvider networks={networkConfig} defaultNetwork="rpc">
+            <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
               <WalletProvider autoConnect theme={lightTheme}>{children}</WalletProvider>
             </SuiClientProvider>
           </QueryClientProvider>
