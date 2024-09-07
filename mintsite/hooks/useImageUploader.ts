@@ -19,10 +19,18 @@ export function useImageUploader() {
         try {
             let body: File | Blob;
             if (typeof fileOrUrl === 'string') {
-                // If it's a URL, fetch the image and create a Blob
-                const response = await fetch(fileOrUrl);
-                const blob = await response.blob();
-                body = blob;
+                // If it's a URL, use our proxy endpoint
+                const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(fileOrUrl)}`;
+                try {
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    body = await response.blob();
+                } catch (fetchError) {
+                    console.error('Error fetching image:', fetchError);
+                    throw new Error(`Failed to fetch image from URL: ${fileOrUrl}`);
+                }
             } else {
                 body = fileOrUrl;
             }
@@ -61,7 +69,7 @@ export function useImageUploader() {
                 throw new Error('Something went wrong when storing the blob!');
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error in storeBlob:', error);
             throw error;
         } finally {
             setUploading(false);

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { fakePost } from '../../../mock';
 
 const USE_FAKE_API = process.env.NEXT_PUBLIC_USE_FAKE_API === 'true';
-const TIMEOUT_DURATION = 120000; // 增加到 120 秒
+const TIMEOUT_DURATION = 60000;
 const MAX_RETRIES = 3;
 
 export async function POST(request: Request) {

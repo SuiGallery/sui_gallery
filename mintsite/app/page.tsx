@@ -16,7 +16,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const {uploading,  storeBlob} = useImageUploader();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
-
   const generateImage = async () => {
     if (!description.trim()) {
       alert("Please enter a description first.");
@@ -64,15 +63,17 @@ export default function Home() {
         },{
           onSuccess: (result) => {
             console.log("Transaction successful:", result);
+            alert("NFT minted successfully!");
           },
           onError: (error) => {
             console.error("Transaction failed:", error);
+            alert("Failed to mint NFT. Please try again.");
           }
         })
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('An error occurred while uploading the image. Please try again.');
+      console.error('Error in handleMint:', error);
+      alert(`Failed to mint NFT: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -108,7 +109,7 @@ export default function Home() {
           </Button>
           <Button
             onClick={handleMint}
-            disabled={isLoading || !imageUrl || uploading || currentAccount?.address === undefined || !isValidSuiAddress(currentAccount?.address)}
+            disabled={isLoading || uploading || currentAccount?.address === undefined || !isValidSuiAddress(currentAccount?.address)}
             isLoading={uploading}
             className="w-full bg-gradient-to-b from-fuchsia-200 to-fuchsia-500"
           >
