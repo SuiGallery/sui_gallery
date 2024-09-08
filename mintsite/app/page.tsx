@@ -14,7 +14,7 @@ export default function Home() {
   const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const {uploading,  storeBlob} = useImageUploader();
+  const { uploading, storeBlob } = useImageUploader();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const generateImage = async () => {
     if (!description.trim()) {
@@ -60,10 +60,10 @@ export default function Home() {
         const tx = await mint(blobInfo.blobId, currentAccount?.address);
         await signAndExecuteTransaction({
           transaction: tx,
-        },{
+        }, {
           onSuccess: (result) => {
             console.log("Transaction successful:", result);
-            alert("NFT minted successfully!");
+            alert(`NFT minted successfully!  https://suiscan.xyz/testnet/tx/${result.digest}`);
           },
           onError: (error) => {
             console.error("Transaction failed:", error);
@@ -82,9 +82,9 @@ export default function Home() {
       {/* Nav */}
       <nav className="flex justify-between items-center w-full">
         <div className="text-2xl font-bold">
-          <Image src="/title.png" alt="Logo" width={343} height={188} priority/>
+          <Image src="/title.png" alt="Logo" width={343} height={188} priority />
         </div>
-        <ConnectButton className="bg-gradient-to-b w-44 h-14 from-blue-500 to-fuchsia-500 hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"/>
+        <ConnectButton className="bg-gradient-to-b w-44 h-14 from-blue-500 to-fuchsia-500 hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95" />
       </nav>
 
       <ImageDisplay imageUrl={imageUrl} isLoading={isLoading} />
@@ -120,6 +120,10 @@ export default function Home() {
       <footer className="flex justify-center items-center w-full">
         <p className="text-white">© 2024 Sui Galery</p>
       </footer>
+
+      <div className="absolute left-5 top-1/3  flex flex-col gap-4 justify-center items-center w-1/5 p-2 bg-white/10 rounded-lg">
+        
+      </div>
     </div>
   );
 }
