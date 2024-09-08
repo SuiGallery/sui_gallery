@@ -19,18 +19,19 @@ export function useImageUploader() {
         try {
             let body: File | Blob;
             if (typeof fileOrUrl === 'string') {
-                // If it's a URL, use our proxy endpoint
-                const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(fileOrUrl)}`;
-                try {
-                    const response = await fetch(proxyUrl);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    body = await response.blob();
-                } catch (fetchError) {
-                    console.error('Error fetching image:', fetchError);
-                    throw new Error(`Failed to fetch image from URL: ${fileOrUrl}`);
+                // 如果是URL，使用我们的代理端点
+                const proxyUrl = 'https://clgallery.cyberchenjw.workers.dev/api/proxy-image';
+                const response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: fileOrUrl }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                body = await response.blob();
             } else {
                 body = fileOrUrl;
             }

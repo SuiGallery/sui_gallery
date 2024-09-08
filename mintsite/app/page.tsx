@@ -8,6 +8,8 @@ import { isValidSuiAddress } from "@mysten/sui.js/utils";
 import Image from "next/image";
 import { useImageUploader } from "@/hooks/useImageUploader";
 import { mint } from "@/contract";
+import { generateImage as generateImageFromAPI } from "@/utils";
+import { SuccessModal } from '../components/SuccessModal';
 
 export default function Home() {
   const currentAccount = useCurrentAccount();
@@ -25,14 +27,8 @@ export default function Home() {
     setIsLoading(true);
     setImageUrl(''); // Clear the previous image
     try {
-      const response = await fetch('/api/generate-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt: description }),
-      });
-      const data = await response.json();
+      const data = await generateImageFromAPI(description);
+      
       if (data.data && data.data[0] && data.data[0].url) {
         setImageUrl(data.data[0].url);
       } else {
@@ -63,7 +59,8 @@ export default function Home() {
         }, {
           onSuccess: (result) => {
             console.log("Transaction successful:", result);
-            alert(`NFT minted successfully!  https://suiscan.xyz/testnet/tx/${result.digest}`);
+            setTxDigest(result.digest);
+            setIsModalOpen(true);
           },
           onError: (error) => {
             console.error("Transaction failed:", error);
@@ -76,6 +73,9 @@ export default function Home() {
       alert(`Failed to mint NFT: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [txDigest, setTxDigest] = useState('');
 
   return (
     <div className="bg-[url('/bg.png')] bg-cover bg-center h-screen w-screen p-10 pb-20 flex flex-col justify-between items-center">
@@ -124,6 +124,12 @@ export default function Home() {
       <div className="absolute left-5 top-1/3  flex flex-col gap-4 justify-center items-center w-1/5 p-2 bg-white/10 rounded-lg">
         
       </div>
+
+      <SuccessModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        txDigest={txDigest} 
+      />
     </div>
   );
 }

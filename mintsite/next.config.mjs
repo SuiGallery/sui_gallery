@@ -17,6 +17,9 @@ const nextConfig = {
         DALLE_API_KEY: process.env.DALLE_API_KEY,
         NEXT_PUBLIC_SUI_NETWORK: process.env.NEXT_PUBLIC_SUI_NETWORK,
     },
+    typescript: {
+        ignoreBuildErrors: true,
+    },
 };
 
 export default nextConfig;

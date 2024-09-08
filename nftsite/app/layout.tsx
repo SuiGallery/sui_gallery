@@ -11,7 +11,7 @@ import "@mysten/dapp-kit/dist/index.css";
 
 
 const { networkConfig } = createNetworkConfig({
-  rpc: { url: process.env.NEXT_PUBLIC_SUI_NETWORK! },
+  testnet: { url: "https://fullnode.testnet.sui.io:443" },
 });
 
 const queryClient = new QueryClient();
@@ -28,7 +28,7 @@ export default function RootLayout({
           <QueryClientProvider client={queryClient}>
             <SuiClientProvider
               networks={networkConfig}
-              defaultNetwork="rpc"
+              defaultNetwork="testnet"
             >
               <WalletProvider autoConnect>
                 {children}

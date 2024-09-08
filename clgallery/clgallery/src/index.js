@@ -3,6 +3,66 @@ addEventListener('fetch', event => {
 });
 
 async function handleRequest(request) {
+    if (request.method === 'OPTIONS') {
+        return handleCORS(request);
+    }
+
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    if (path === '/api/proxy-image') {
+        return handleProxyImage(request);
+    }
+
+    return handleExistingRoute(request);
+}
+
+function handleCORS(request) {
+    let headers = new Headers({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+    });
+
+    return new Response(null, {
+        status: 204,
+        headers
+    });
+}
+
+async function handleProxyImage(request) {
+    if (request.method !== 'POST') {
+        return new Response('Method not allowed', { status: 405 });
+    }
+
+    let imageUrl;
+    try {
+        const body = await request.json();
+        imageUrl = body.url;
+    } catch (error) {
+        return new Response('Invalid JSON', { status: 400 });
+    }
+
+    if (!imageUrl) {
+        return new Response('Missing URL in request body', { status: 400 });
+    }
+
+    try {
+        const response = await fetch(imageUrl);
+        const headers = new Headers(response.headers);
+        headers.set('Access-Control-Allow-Origin', '*');
+
+        return new Response(response.body, {
+            status: response.status,
+            headers
+        });
+    } catch (error) {
+        return new Response('Failed to proxy image: ' + error.message, { status: 500 });
+    }
+}
+
+// 你现有的路由处理函数
+async function handleExistingRoute(request) {
     const url = new URL(request.url);
     const objectId = url.searchParams.get('objectId');
 
