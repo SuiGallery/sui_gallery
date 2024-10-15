@@ -1,7 +1,7 @@
 'use client'
 import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { TextArea } from "@radix-ui/themes";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "../components/Button";
 import { ImageDisplay } from "../components/ImageDisplay";
 import { isValidSuiAddress } from "@mysten/sui.js/utils";
@@ -18,39 +18,30 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const { uploading, storeBlob } = useImageUploader();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
-  const generateImage = async () => {
-    if (!description.trim()) {
-      alert("Please enter a description first.");
-      return;
-    }
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    setIsLoading(true);
-    setImageUrl(''); // Clear the previous image
-    try {
-      const data = await generateImageFromAPI(description);
-      
-      if (data.data && data.data[0] && data.data[0].url) {
-        setImageUrl(data.data[0].url);
-      } else {
-        console.error('Unexpected response format:', data);
-        alert('Failed to generate image. Please try again.');
+  const captureImage = () => {
+    if (videoRef.current && canvasRef.current) {
+      const context = canvasRef.current.getContext('2d');
+      if (context) {
+        context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+        const imageDataUrl = canvasRef.current.toDataURL('image/jpeg');
+        setCapturedImage(imageDataUrl);
+        setImageUrl(imageDataUrl);
       }
-    } catch (error) {
-      console.error('Error generating image:', error instanceof Error ? error.message : 'Unknown error');
-      alert('An error occurred while generating the image. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleMint = async () => {
-    if (!imageUrl) {
-      alert("Please generate an image first.");
+    if (!capturedImage) {
+      alert("Please capture an image first.");
       return;
     }
 
     try {
-      const blobInfo = await storeBlob(imageUrl);
+      const blobInfo = await storeBlob(capturedImage);
       console.log("Uploaded blob info:", blobInfo);
       if (blobInfo && currentAccount?.address) {
         const tx = await mint(blobInfo.blobId, currentAccount?.address);
@@ -77,6 +68,23 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [txDigest, setTxDigest] = useState('');
 
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      })
+      .catch(err => console.error("Error accessing camera:", err));
+
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
+      }
+    };
+  }, []);
+
   return (
     <div className="bg-[url('/bg.png')] bg-cover bg-center h-screen w-screen p-10 pb-20 flex flex-col justify-between items-center">
       {/* Nav */}
@@ -87,7 +95,13 @@ export default function Home() {
         <ConnectButton className="bg-gradient-to-b w-44 h-14 from-blue-500 to-fuchsia-500 hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95" />
       </nav>
 
-      <ImageDisplay imageUrl={imageUrl} isLoading={isLoading} />
+      <div className="relative">
+        <video ref={videoRef} autoPlay playsInline muted className="w-full max-w-lg" />
+        <canvas ref={canvasRef} className="hidden" width="640" height="480" />
+        {capturedImage && (
+          <img src={capturedImage} alt="Captured" className="absolute top-0 left-0 w-full h-full object-cover" />
+        )}
+      </div>
 
       {/* Mint */}
       <div className="flex w-1/2 justify-center items-center gap-4">
@@ -100,16 +114,14 @@ export default function Home() {
         />
         <div className="w-1/6 flex flex-col gap-4">
           <Button
-            onClick={generateImage}
-            disabled={isLoading}
-            isLoading={isLoading}
+            onClick={captureImage}
             className="w-full bg-gradient-to-b from-blue-500 to-fuchsia-200"
           >
-            <p className="uppercase font-bold text-white self-center">Create</p>
+            <p className="uppercase font-bold text-white self-center">Capture</p>
           </Button>
           <Button
             onClick={handleMint}
-            disabled={isLoading || uploading || currentAccount?.address === undefined || !isValidSuiAddress(currentAccount?.address)}
+            disabled={!capturedImage || uploading || currentAccount?.address === undefined || !isValidSuiAddress(currentAccount?.address)}
             isLoading={uploading}
             className="w-full bg-gradient-to-b from-fuchsia-200 to-fuchsia-500"
           >
