@@ -5,10 +5,11 @@ use std::string::String;
 use sui::address;
 use sui::display;
 use sui::package;
-use sui::table::{Self, Table};
 
 const BASE36: vector<u8> = b"0123456789abcdefghijklmnopqrstuvwxyz";
-const VISUALIZATION_SITE: address =
+const EVENT_VISUALIZATION_SITE: address =
+    @0xe85a97a3e07f984c53e1a8a1dc6bd32ebec4e48610b3191e4e2e911eccabcb9b;
+const PHOTO_VISUALIZATION_SITE: address =
     @0xe85a97a3e07f984c53e1a8a1dc6bd32ebec4e48610b3191e4e2e911eccabcb9b;
 
 public struct State has key {
@@ -28,6 +29,7 @@ public struct EventSite has key, store{
 public struct Photo has key, store {
     id: UID,
     owner: address,
+    b36addr: String,
     image_blob: String,
 }
 
@@ -36,25 +38,41 @@ public struct GALLERY has drop {}
 
 fun init(otw: GALLERY, ctx: &mut TxContext) {
     let publisher = package::claim(otw, ctx);
-    let mut display = display::new<EventSite>(&publisher, ctx);
+    let mut event_display = display::new<EventSite>(&publisher, ctx);
 
-    display.add(
+    event_display.add(
         b"link".to_string(),
         b"https://{b36addr}.walrus.site".to_string(),
     );
-    display.add(
+    event_display.add(
         b"event_url".to_string(), //for each event site
         b"https://clgallery.cyberchenjw.workers.dev/?objectId={id}".to_string(),
     );
-    display.add(
+    event_display.add(
         b"walrus site address".to_string(),
-        VISUALIZATION_SITE.to_string(),
+        EVENT_VISUALIZATION_SITE.to_string(),
     );
-    display.update_version();
+    event_display.update_version();
+
+    let mut photo_display = display::new<Photo>(&publisher, ctx);
+    photo_display.add(
+        b"link".to_string(),
+        b"https://{b36addr}.walrus.site".to_string(),
+    );
+    photo_display.add(
+        b"photo_url".to_string(), 
+        b"https://clgallery.cyberchenjw.workers.dev/?objectId={id}".to_string(),
+    );
+    photo_display.add(
+        b"walrus site address".to_string(),
+        PHOTO_VISUALIZATION_SITE.to_string(),
+    );
+    photo_display.update_version();
 
     transfer::share_object(State{id: object::new(ctx), events: vector::empty()});
     transfer::public_transfer(publisher, ctx.sender());
-    transfer::public_transfer(display, ctx.sender());
+    transfer::public_transfer(event_display, ctx.sender());
+    transfer::public_transfer(photo_display, ctx.sender());
 }
 
 /// Creates a a new event site
@@ -90,9 +108,11 @@ public entry fun mint_photo(
     let sender = tx_context::sender(ctx);
     let id = object::new(ctx);
     let object_address = object::uid_to_address(&id);
+    let b36addr = to_b36(id.uid_to_address());
     let photo = Photo {
         id,
         owner: sender,
+        b36addr,
         image_blob: photo_blob_id,
     };
     vector::push_back(&mut event.minted, object_address);
