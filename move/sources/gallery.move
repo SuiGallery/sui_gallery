@@ -13,18 +13,21 @@ const VISUALIZATION_SITE: address =
 
 public struct State has key {
     id: UID,
-    artists: Table<address, Collection>,
-    total_art: u64
+    events: vector<address>, //EventSite
 }
 
-public struct Collection has store{
-    artist: address,
-    minted: vector<String> //<blob_id>
-}
-
-public struct Art has key, store {
+public struct EventSite has key, store{
     id: UID,
+    host: address,
     b36addr: String,
+    site_blob: String,
+    expiry: u64,
+    minted: vector<address> //<nft_obj_add>
+}
+
+public struct Photo has key, store {
+    id: UID,
+    owner: address,
     image_blob: String,
 }
 
@@ -33,14 +36,14 @@ public struct GALLERY has drop {}
 
 fun init(otw: GALLERY, ctx: &mut TxContext) {
     let publisher = package::claim(otw, ctx);
-    let mut display = display::new<Art>(&publisher, ctx);
+    let mut display = display::new<EventSite>(&publisher, ctx);
 
     display.add(
         b"link".to_string(),
         b"https://{b36addr}.walrus.site".to_string(),
     );
     display.add(
-        b"image_url".to_string(),
+        b"event_url".to_string(), //for each event site
         b"https://clgallery.cyberchenjw.workers.dev/?objectId={id}".to_string(),
     );
     display.add(
@@ -49,35 +52,51 @@ fun init(otw: GALLERY, ctx: &mut TxContext) {
     );
     display.update_version();
 
-    transfer::share_object(State{id: object::new(ctx), artists: table::new(ctx), total_art: 0});
+    transfer::share_object(State{id: object::new(ctx), events: vector::empty()});
     transfer::public_transfer(publisher, ctx.sender());
     transfer::public_transfer(display, ctx.sender());
 }
 
-/// Creates a new Art.
+/// Creates a a new event site
 ///
-/// The color and number of sides are chosen at random.
-public fun mint(blob_id: String, state: &mut State, ctx: &mut TxContext):Art {
+public entry fun create_event(
+    site_blob_id: String, 
+    state: &mut State, 
+    expiry: u64,
+    ctx: &mut TxContext
+) {
     let sender = tx_context::sender(ctx);
-    let art = new(blob_id, ctx);
-    
-    if(!table::contains(&state.artists, sender)){
-        table::add(&mut state.artists, sender, Collection{artist: sender, minted: vector::empty()});
+    let id = object::new(ctx);
+    let object_address = object::uid_to_address(&id);
+    let b36addr = to_b36(id.uid_to_address());
+    let event = EventSite {
+        id,
+        host: sender,
+        b36addr,
+        site_blob: site_blob_id,
+        expiry,
+        minted: vector::empty()
     };
-    let collection = table::borrow_mut(&mut state.artists, sender);
-    vector::push_back(&mut collection.minted, blob_id);
-    state.total_art = state.total_art + 1;
-    art
+    
+    vector::push_back(&mut state.events, object_address);
+    transfer::share_object(event);
 }
 
-fun new(blob_id: String, ctx: &mut TxContext): Art {
+public entry fun mint_photo(
+    photo_blob_id: String, 
+    event: &mut EventSite,
+    ctx: &mut TxContext
+) {
+    let sender = tx_context::sender(ctx);
     let id = object::new(ctx);
-    let b36addr = to_b36(id.uid_to_address());
-    Art {
+    let object_address = object::uid_to_address(&id);
+    let photo = Photo {
         id,
-        b36addr,
-        image_blob: blob_id,
-    }
+        owner: sender,
+        image_blob: photo_blob_id,
+    };
+    vector::push_back(&mut event.minted, object_address);
+    transfer::public_transfer(photo, sender);
 }
 
 public fun to_b36(addr: address): String {
