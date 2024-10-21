@@ -21,7 +21,7 @@ public struct EventSite has key, store{
     id: UID,
     host: address,
     b36addr: String,
-    site_blob: String,
+    name: String,
     expiry: u64,
     minted: vector<address> //<nft_obj_add>
 }
@@ -45,10 +45,6 @@ fun init(otw: GALLERY, ctx: &mut TxContext) {
         b"https://{b36addr}.walrus.site".to_string(),
     );
     event_display.add(
-        b"event_url".to_string(), //for each event site
-        b"https://clgallery.cyberchenjw.workers.dev/?objectId={id}".to_string(),
-    );
-    event_display.add(
         b"walrus site address".to_string(),
         EVENT_VISUALIZATION_SITE.to_string(),
     );
@@ -60,7 +56,7 @@ fun init(otw: GALLERY, ctx: &mut TxContext) {
         b"https://{b36addr}.walrus.site".to_string(),
     );
     photo_display.add(
-        b"photo_url".to_string(), 
+        b"image_url".to_string(), 
         b"https://clgallery.cyberchenjw.workers.dev/?objectId={id}".to_string(),
     );
     photo_display.add(
@@ -78,7 +74,7 @@ fun init(otw: GALLERY, ctx: &mut TxContext) {
 /// Creates a a new event site
 ///
 public entry fun create_event(
-    site_blob_id: String, 
+    name: String, 
     state: &mut State, 
     expiry: u64,
     ctx: &mut TxContext
@@ -91,7 +87,7 @@ public entry fun create_event(
         id,
         host: sender,
         b36addr,
-        site_blob: site_blob_id,
+        name,
         expiry,
         minted: vector::empty()
     };
