@@ -1,12 +1,12 @@
 ## Mintsite
-+ Site object ID: `0xf7ab8d26026164a70f22cfaeb35f0e5923c8e5735d52d8ae6caf0b952e0b8ac4`
-+ Browse the resulting site at: https://6683buvw2z7jvkg37ufutxtei0beoo45uew8vmr7uxa2vnkhxg.walrus.site
++ Site object ID: `0x381065e2c44aedc78d740109fed3a39038603894843f8e0c827e137ffe4a7c00`
++ Browse the resulting site at: https://1eay44s5biminemlp1a75r7c0d7p558ugfmejjm51h3kb8g0sg.walrus.site
 ### publish:
 + ```cd ./walrus-sites```
-+ ```./target/release/site-builder --config site-builder/assets/builder-example.yaml publish ../mintsite/out```
++ ```./target/release/site-builder publish ../mintsite/out```
 ### update:
 + ```cd ./walrus-sites```
-+ ```./target/release/site-builder --config site-builder/assets/builder-example.yaml update ../mintsite/out 0xf7ab8d26026164a70f22cfaeb35f0e5923c8e5735d52d8ae6caf0b952e0b8ac4 --force```
++ ```./target/release/site-builder update ../mintsite/out 0x381065e2c44aedc78d740109fed3a39038603894843f8e0c827e137ffe4a7c00 --force```
 ## nftsite
 ### Origin:
 + Site object ID: `0xe85a97a3e07f984c53e1a8a1dc6bd32ebec4e48610b3191e4e2e911eccabcb9b`
