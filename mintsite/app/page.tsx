@@ -1,6 +1,6 @@
 'use client'
 import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
-import { useState,useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "../components/ui/button";
 import Image from "next/image";
 import { useImageUploader } from "@/hooks/useImageUploader";
@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { getSubdomainAndPath, subdomainToObjectId } from "@/utils";
 import { getFullnodeUrl, SuiClient } from "@mysten/sui.js/client";
 
+
 export default function Home() {
   const currentAccount = useCurrentAccount();
   const [isLoading, setIsLoading] = useState(false);
@@ -22,11 +23,12 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [txDigest, setTxDigest] = useState('');
 
+
   const client = new SuiClient({
     url: getFullnodeUrl('testnet'),
   });
 
-  const handleCapture = async (capturedImageUrl: string) => {    
+  const handleCapture = async (capturedImageUrl: string) => {
     await handleMint(capturedImageUrl);
   };
 
@@ -78,24 +80,24 @@ export default function Home() {
     try {
       const url = window.location.origin;
       const parsedUrl = getSubdomainAndPath(url);
-     //const parsedUrl = getSubdomainAndPath('https://48zr8xtjowbw23lhdy727ef86x14vr6upzwiiiw8b3mwsa8ty2.walrus.site/')
+      //const parsedUrl = getSubdomainAndPath('https://48zr8xtjowbw23lhdy727ef86x14vr6upzwiiiw8b3mwsa8ty2.walrus.site/')
       if (!parsedUrl) {
-        
+
         return;
       }
-      
+
       const objectId = subdomainToObjectId(parsedUrl.subdomain);
       console.log("Object ID:", objectId);
       if (!objectId) {
-        
+
         return;
       } else {
         const event = await getEvent(client, objectId);
         setEvent(event);
         console.log("Event:", event);
-      }      
+      }
     } catch (err) {
-      
+
     }
     setIsInitialDataFetched(true);
   }, [client]);
@@ -106,13 +108,20 @@ export default function Home() {
     }
   }, [isInitialDataFetched, fetchData]);
 
+  const handleShare = () => {
+    const currentUrl = window.location.href;
+    const tweetText = encodeURIComponent(`Check out this event: ${event?.name || 'Event'}\n`);
+    const twitterShareUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(currentUrl)}`;
+    window.open(twitterShareUrl, '_blank');
+  };
+
   return (
     <div className="bg-gradient-to-b from-blue-500 to-fuchsia-500 min-h-screen w-full p-4 flex flex-col">
       <Card className="flex flex-col flex-grow overflow-hidden">
         <div className="flex justify-between items-center p-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Event Photo Booth : {event?.name}</h1>
           <div className="flex items-center gap-5">
-            <Button size="lg" onClick={() => { console.log('Share Event') }} className="w-auto">
+            <Button size="lg" onClick={handleShare} className="w-auto">
               <p>Share Event</p>
             </Button>
             <ConnectButton className="w-full sm:w-44 h-12 sm:h-14 transition-all duration-300 cursor-pointer active:scale-95" />
