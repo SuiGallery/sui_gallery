@@ -1,4 +1,3 @@
-import { fakePost } from '../mock';
 import { SuiClient } from "@mysten/sui.js/client";
 import { isValidSuiAddress, isValidSuiObjectId, toHEX } from "@mysten/sui.js/utils";
 import baseX from "base-x";

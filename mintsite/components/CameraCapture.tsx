@@ -18,23 +18,27 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, isLoadi
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
 
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true })
+    startCamera();
+  }, [facingMode]);
+
+  const startCamera = () => {
+    navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: facingMode } 
+    })
       .then(stream => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
       })
       .catch(err => console.error("Error accessing camera:", err));
+  };
 
-    return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach(track => track.stop());
-      }
-    };
-  }, []);
+  const toggleCamera = () => {
+    setFacingMode(prevMode => prevMode === 'user' ? 'environment' : 'user');
+  };
 
   const captureImage = () => {
     if (selectedImage) {
@@ -105,6 +109,15 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, isLoadi
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+          </svg>
+        </Button>
+        <Button
+          onClick={toggleCamera}
+          className="absolute top-4 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg"
+          disabled={isLoading}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         </Button>
       </div>
