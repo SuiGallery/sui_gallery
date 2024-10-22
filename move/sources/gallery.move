@@ -8,7 +8,7 @@ use sui::package;
 
 const BASE36: vector<u8> = b"0123456789abcdefghijklmnopqrstuvwxyz";
 const EVENT_VISUALIZATION_SITE: address =
-    @0xe85a97a3e07f984c53e1a8a1dc6bd32ebec4e48610b3191e4e2e911eccabcb9b;
+    @0x381065e2c44aedc78d740109fed3a39038603894843f8e0c827e137ffe4a7c00;
 const PHOTO_VISUALIZATION_SITE: address =
     @0xe85a97a3e07f984c53e1a8a1dc6bd32ebec4e48610b3191e4e2e911eccabcb9b;
 
