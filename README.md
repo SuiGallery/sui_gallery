@@ -16,7 +16,7 @@
 + ```./target/release/site-builder publish ../eventsite/out```
 ### update:
 + ```cd ./walrus-sites```
-+ ```./target/release/site-builder update ../eventsite/out 0x381065e2c44aedc78d740109fed3a39038603894843f8e0c827e137ffe4a7c00 --force```
++ ```./target/release/site-builder update ../eventsite/out 0xd6707c0176cec7e7228fd4525359c9d8a1021414feddc1ac30c9877d3e5d7344 --force```
 ### Origin:
 + Site object ID: `0xe85a97a3e07f984c53e1a8a1dc6bd32ebec4e48610b3191e4e2e911eccabcb9b`
 + Browse the resulting site at: https://5shctorbn0qpvrcvih5cdefo06gc2s4lg4es28fsbec1ursucb.walrus.site

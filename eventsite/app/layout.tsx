@@ -24,7 +24,10 @@ export default function RootLayout({
         <Theme appearance="light" accentColor="orange" radius="full">
           <QueryClientProvider client={queryClient}>
             <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
-              <WalletProvider autoConnect>{children}</WalletProvider>
+              <WalletProvider autoConnect stashedWallet={{
+                name: "Event Photo Booth",
+                network: "testnet",
+              }}>{children}</WalletProvider>
             </SuiClientProvider>
           </QueryClientProvider>
         </Theme>
