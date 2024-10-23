@@ -19,7 +19,6 @@ export default function Home() {
   const { uploading, storeBlob } = useImageUploader();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const [event, setEvent] = useState<Event>();
-  const [isInitialDataFetched, setIsInitialDataFetched] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [txDigest, setTxDigest] = useState('');
 
@@ -53,12 +52,13 @@ export default function Home() {
         await signAndExecuteTransaction({
           transaction: tx,
         }, {
-          onSuccess: (result) => {
+          onSuccess: async (result) => {
             console.log("Transaction successful:", result);
             setTxDigest(result.digest);
             setIsLoading(false);
             setIsModalOpen(true);
-            fetchData(); // 直接调用 fetchData 而不是设置 flag
+            // 添加延迟后再调用 fetchData
+            setTimeout(() => fetchData(), 2000); // 2秒延迟
           },
           onError: (error) => {
             console.error("Transaction failed:", error);
@@ -75,7 +75,7 @@ export default function Home() {
   };
 
   const fetchData = useCallback(async () => {
-    if (!client) return; // 确保 client 存在
+    if (!client) return;
 
     try {
       const url = window.location.origin;
@@ -87,26 +87,21 @@ export default function Home() {
       }
 
       const objectId = subdomainToObjectId(parsedUrl.subdomain);
-      console.log("Object ID:", objectId);
       if (!objectId) {
-
         return;
       } else {
         const event = await getEvent(client, objectId);
+        console.log("Fetched event data:", event); // 添加日志
         setEvent(event);
-        console.log("Event:", event);
       }
     } catch (err) {
-
+      console.error("Error fetching event data:", err); // 添加错误日志
     }
-    setIsInitialDataFetched(true);
   }, [client]);
 
   useEffect(() => {
-    if (!isInitialDataFetched) {
-      fetchData();
-    }
-  }, [isInitialDataFetched, fetchData]);
+    fetchData();
+  }, []);
 
   const handleShare = () => {
     const currentUrl = window.location.href;

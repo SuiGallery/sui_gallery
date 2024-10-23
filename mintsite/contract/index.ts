@@ -23,6 +23,7 @@ const getEvent = async (client: SuiClient, eventId: string) => {
             showContent: true,
         }
     });
+    console.log(blob);
     const blobData = blob.data?.content as unknown as any;
     const event: Event = {
         b36addr: blobData.fields.b36addr,
@@ -33,12 +34,25 @@ const getEvent = async (client: SuiClient, eventId: string) => {
         minted: blobData.fields.minted,
         blob: []
     };
-    const minted = await Promise.all(event.minted.map(async (m: string) => await client.getObject({
-        id: m,
+    // const minted = await Promise.all(event.minted.map(async (m: string) => await client.getObject({
+    //     id: m,
+    //     options: {
+    //         showContent: true,
+    //         }
+    //     })));
+    // minted.forEach((m: any) => {
+    //     event.blob.push({
+    //         b36addr: m.data?.content.fields.b36addr,
+    //         id: m.data?.content.fields.id.id,
+    //         image_blob: m.data?.content.fields.image_blob
+    //     });
+    // });
+    const minted = await client.multiGetObjects({
+        ids: event.minted,
         options: {
             showContent: true,
-            }
-        })));
+        }
+    });
     minted.forEach((m: any) => {
         event.blob.push({
             b36addr: m.data?.content.fields.b36addr,

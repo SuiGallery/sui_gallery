@@ -21,7 +21,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, txD
             rel="noopener noreferrer"
             className="text-blue-500 hover:underline"
           >
-            https://suiscan.xyz/testnet/tx/{txDigest}
+            Transaction Success
           </a>
         </p>
         <button 
