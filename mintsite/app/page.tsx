@@ -80,7 +80,7 @@ export default function Home() {
     try {
       const url = window.location.origin;
       const parsedUrl = getSubdomainAndPath(url);
-      //const parsedUrl = getSubdomainAndPath('https://48zr8xtjowbw23lhdy727ef86x14vr6upzwiiiw8b3mwsa8ty2.walrus.site/')
+      //const parsedUrl = getSubdomainAndPath('https://4czdbhxp8j4xsmsfttxbvlxx1o41i21jsua26hvdk86217r8z1.walrus.site/')
       if (!parsedUrl) {
 
         return;
